@@ -2,13 +2,13 @@ import { AmplifyAuthenticator } from '@aws-amplify/ui-react'
 import { Amplify, API, Auth, withSSRContext } from 'aws-amplify'
 import Head from 'next/head'
 import awsExports from '../aws-exports'
-import { createTodo } from '../graphql/mutations'
-import { listTodos } from '../graphql/queries'
+import { createPost } from '../graphql/mutations'
+import { listBlogs } from '../graphql/queries'
 import {
-  CreateTodoInput,
-  CreateTodoMutation,
-  ListTodosQuery,
-  Todo,
+  CreateBlogInput,
+  CreateBlogMutation,
+  ListBlogsQuery,
+  Blog,
 } from '../API'
 import { GRAPHQL_AUTH_MODE } from '@aws-amplify/api'
 import { useRouter } from 'next/router'
@@ -17,7 +17,7 @@ import styles from '../styles/Home.module.css'
 
 Amplify.configure({ ...awsExports, ssr: true })
 
-export default function Home({ todos = [] }: { todos: Todo[] }) {
+export default function Home({ todos = [] }: { todos: Blog[] }) {
   const router = useRouter()
 
   async function handleCreateTodo(event) {
@@ -26,20 +26,19 @@ export default function Home({ todos = [] }: { todos: Todo[] }) {
     const form = new FormData(event.target)
 
     try {
-      const createInput: CreateTodoInput = {
+      const createInput: CreateBlogInput = {
         name: form.get('title').toString(),
-        description: form.get('content').toString(),
       }
 
       const request = (await API.graphql({
         authMode: GRAPHQL_AUTH_MODE.AMAZON_COGNITO_USER_POOLS,
-        query: createTodo,
+        query: createPost,
         variables: {
           input: createInput,
         },
-      })) as { data: CreateTodoMutation; errors: any[] }
+      })) as { data: CreateBlogMutation; errors: any[] }
 
-      router.push(`/todo/${request.data.createTodo.id}`)
+      router.push(`/todo/${request.data.createBlog.id}`)
     } catch ({ errors }) {
       console.error(...errors)
       throw new Error(errors[0].message)
@@ -65,7 +64,7 @@ export default function Home({ todos = [] }: { todos: Todo[] }) {
           {todos.map((todo) => (
             <a href={`/todo/${todo.id}`} key={todo.id}>
               <h3>{todo.name}</h3>
-              <p>{todo.description}</p>
+              <p>{todo.name}</p>
             </a>
           ))}
 
@@ -106,13 +105,13 @@ export default function Home({ todos = [] }: { todos: Todo[] }) {
 export const getServerSideProps: GetServerSideProps = async ({ req }) => {
   const SSR = withSSRContext({ req })
 
-  const response = (await SSR.API.graphql({ query: listTodos })) as {
-    data: ListTodosQuery
+  const response = (await SSR.API.graphql({ query: listBlogs })) as {
+    data: ListBlogsQuery
   }
 
   return {
     props: {
-      todos: response.data.listTodos.items,
+      todos: response.data.listBlogs.items,
     },
   }
 }

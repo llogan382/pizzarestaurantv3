@@ -1,17 +1,17 @@
 import { Amplify, API, withSSRContext } from 'aws-amplify'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
-import { DeleteTodoInput, GetTodoQuery, Todo, ListTodosQuery } from '../../API'
+import { DeleteBlogInput, GetBlogQuery, Blog, ListBlogsQuery } from '../../API'
 import awsExports from '../../aws-exports'
-import { deleteTodo } from '../../graphql/mutations'
-import { getTodo, listTodos } from '../../graphql/queries'
+import { deleteBlog } from '../../graphql/mutations'
+import { getBlog, listBlogs } from '../../graphql/queries'
 import { GetStaticProps, GetStaticPaths } from 'next'
 import { GRAPHQL_AUTH_MODE } from '@aws-amplify/api'
 import styles from '../../styles/Home.module.css'
 
 Amplify.configure({ ...awsExports, ssr: true })
 
-export default function TodoPage({ todo }: { todo: Todo }) {
+export default function TodoPage({ todo }: { todo: Blog }) {
   const router = useRouter()
 
   if (router.isFallback) {
@@ -24,13 +24,13 @@ export default function TodoPage({ todo }: { todo: Todo }) {
 
   async function handleDelete(): Promise<void> {
     try {
-      const deleteInput: DeleteTodoInput = {
+      const deleteInput: DeleteBlogInput = {
         id: todo.id,
       }
 
       await API.graphql({
         authMode: GRAPHQL_AUTH_MODE.AMAZON_COGNITO_USER_POOLS,
-        query: deleteTodo,
+        query: deleteBlog,
         variables: {
           input: deleteInput,
         },
@@ -52,7 +52,7 @@ export default function TodoPage({ todo }: { todo: Todo }) {
 
       <main className={styles.main}>
         <h1 className={styles.title}>{todo.name}</h1>
-        <p className={styles.description}>{todo.description}</p>
+        <p className={styles.description}>{todo.name}</p>
       </main>
 
       <footer>
@@ -68,11 +68,11 @@ export const getStaticPaths: GetStaticPaths = async () => {
   const SSR = withSSRContext()
 
   const todosQuery = (await SSR.API.graphql({
-    query: listTodos,
+    query: listBlogs,
     authMode: GRAPHQL_AUTH_MODE.API_KEY,
-  })) as { data: ListTodosQuery; errors: any[] }
+  })) as { data: ListBlogsQuery; errors: any[] }
 
-  const paths = todosQuery.data.listTodos.items.map((todo: Todo) => ({
+  const paths = todosQuery.data.listBlogs.items.map((todo: Blog) => ({
     params: { id: todo.id },
   }))
 
@@ -86,15 +86,15 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   const SSR = withSSRContext()
 
   const response = (await SSR.API.graphql({
-    query: getTodo,
+    query: getBlog,
     variables: {
       id: params.id,
     },
-  })) as { data: GetTodoQuery }
+  })) as { data: GetBlogQuery }
 
   return {
     props: {
-      todo: response.data.getTodo,
+      todo: response.data.getBlog,
     },
   }
 }
