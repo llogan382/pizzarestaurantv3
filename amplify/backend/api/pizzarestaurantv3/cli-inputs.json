@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "serviceConfiguration": {
+    "apiName": "pizzarestaurantv3",
+    "serviceName": "AppSync",
+    "gqlSchemaPath": "/tmp/amplify-9d2d0d74-0a4b-465b-baeb-3b8e530268f6/amplify/backend/api/pizzarestaurantv3/schema.graphql",
+    "defaultAuthType": {
+      "mode": "API_KEY",
+      "keyDescription": "api key description",
+      "expirationTime": 30
+    },
+    "additionalAuthTypes": [
+      {
+        "mode": "AWS_IAM"
+      }
+    ],
+    "conflictResolution": {
+      "defaultResolutionStrategy": {
+        "type": "AUTOMERGE"
+      }
+    }
+  }
+}
